@@ -1,0 +1,15 @@
+<ion-view hide-nav-bar="true">
+  <ion-content>
+
+    <div ng-if="model.status === 'loading'" style="text-align: center; padding-top: 10em">
+      <p>{{model.loading.message}}</p>
+      <ion-spinner></ion-spinner>
+    </div>
+
+    <div ng-if="model.status === 'error'" style="text-align: center; padding-top: 10em">
+      <p>{{model.error.message}}</p>
+      <button ng-click="model.error.retry()" class="button button-positive">Retry</button>
+    </div>
+
+  </ion-content>
+</ion-view>

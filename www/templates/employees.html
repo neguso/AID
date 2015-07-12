@@ -1,0 +1,32 @@
+<ion-view view-title="{{model.state === 'unauthorized' ? '' : 'Employees'}}">
+  <ion-content>
+
+    <div ng-if="model.state === 'unauthorized'" style="text-align: center; padding-top: 10em">
+      <p>{{model.unauthorized.message}}</p>
+      <button ng-click="model.unauthorized.login()" class="button button-positive">Login</button>
+    </div>
+
+    <div ng-if="model.state === 'loading'" style="text-align: center; padding-top: 10em">
+      <p>{{model.loading.message}}</p>
+      <ion-spinner></ion-spinner>
+    </div>
+
+    <div ng-if="model.state === 'error'" style="text-align: center; padding-top: 10em">
+      <p>{{model.error.message}}</p>
+      <button ng-click="model.error.retry()" class="button button-positive">Retry</button>
+    </div>
+
+    <div ng-if="model.state === 'ready'">
+
+      <ion-list>
+        <ion-item ng-repeat="employee in model.ready.employees" href="{{'#/app/employee/' + employee.identity}}" class="item-avatar">
+          <img ng-src="{{employee.avatar}}">
+          <h2>{{employee.firstName + ' ' + employee.lastName}}</h2>
+          <p>{{employee.jobPosition}}, {{employee.officeLocation}}</p>
+        </ion-item>
+      </ion-list>
+
+    </div>
+
+  </ion-content>
+</ion-view>

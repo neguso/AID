@@ -1,0 +1,56 @@
+<ion-view view-title="Employee">
+  <ion-content>
+
+    <div ng-if="model.state === 'loading'" style="text-align: center; padding-top: 10em">
+      <p>{{model.loading.message}}</p>
+      <ion-spinner></ion-spinner>
+    </div>
+
+    <div ng-if="model.state === 'error'" style="text-align: center; padding-top: 10em">
+      <p>{{model.error.message}}</p>
+      <button ng-click="model.error.retry()" class="button button-positive">Retry</button>
+    </div>
+
+    <div ng-if="model.state === 'ready'">
+
+      <div class="list card">
+
+        <div class="item item-image">
+          <img ng-src="{{model.ready.employee.avatar}}" />
+        </div>
+
+        <div class="item" style="padding-top: 0.3em; padding-bottom: 0.5em">
+          <h1 style="font-size: 1.5em; padding-bottom: 0.1em; margin-bottom: 0.1em ">{{model.ready.employee.firstName + ' ' + model.ready.employee.lastName}}</h1>
+          <p>{{model.ready.employee.jobPosition}}</p>
+        </div>
+
+        <a class="item item-icon-left item-icon-right" ng-href="#/app/offices">
+          <i class="icon ion-map"></i>
+          {{model.ready.employee.officeLocation}}
+          <i class="icon ion-ios-arrow-forward" style="color: darkgray"></i>
+        </a>
+
+        <a class="item item-icon-left item-icon-right" ng-href="mailto:{{model.ready.employee.email}}">
+          <i class="icon ion-email"></i>
+          {{model.ready.employee.email}}
+          <i class="icon ion-ios-arrow-forward" style="color: darkgray"></i>
+        </a>
+
+        <a class="item item-icon-left item-icon-right" ng-href="skype:{{model.ready.employee.skype}}">
+          <i class="icon ion-social-skype"></i>
+          {{model.ready.employee.skype}}
+          <i class="icon ion-ios-arrow-forward" style="color: darkgray"></i>
+        </a>
+
+        <a class="item item-icon-left item-icon-right" ng-href="tel:{{model.ready.employee.phone}}">
+          <i class="icon ion-ios-telephone"></i>
+          {{model.ready.employee.phone}}
+          <i class="icon ion-ios-arrow-forward" style="color: darkgray"></i>
+        </a>
+
+      </div>
+
+    </div>
+
+  </ion-content>
+</ion-view>

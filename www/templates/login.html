@@ -1,0 +1,28 @@
+<ion-modal-view>
+  <ion-header-bar>
+    <h1 class="title">Login</h1>
+    <div class="buttons">
+      <button class="button button-clear" ng-click="login.onclose()">Close</button>
+    </div>
+  </ion-header-bar>
+  <ion-content>
+    <form ng-submit="login.onlogin()">
+      <div class="list">
+        <label class="item item-input">
+          <span class="input-label">User</span>
+          <input type="text" ng-model="login.username">
+        </label>
+        <label class="item item-input">
+          <span class="input-label">Password</span>
+          <input type="password" ng-model="login.password">
+        </label>
+        <label class="item">
+          <button class="button button-block button-positive" type="submit">Log in</button>
+        </label>
+      </div>
+
+      <div ng-if="login.message.length > 0" style="text-align: center; color: red">{{login.message}}</div>
+
+    </form>
+  </ion-content>
+</ion-modal-view>
