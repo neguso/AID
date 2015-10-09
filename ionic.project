@@ -3,8 +3,9 @@
   "app_id": "",
   "proxies": [
     {
+			// calls made to http://localhost[path] are redirected to [proxyUrl]
       "path": "/auth",
-      "proxyUrl": "http://10.115.6.150/auth"
+      "proxyUrl": "http://10.115.6.150:3000/auth"
     }
   ],
   "gulpStartupTasks": [

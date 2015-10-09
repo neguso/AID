@@ -1,7 +1,7 @@
 angular.module('app.services', ['ionic'])
 	.value('configuration', {
 		apiKey: 'abcde',
-		apiServer: 'http://localhost:3000'
+		apiServer: 'http://localhost:8100'
 		//apiServer: 'http://10.115.6.150:3000'
 	})
 
