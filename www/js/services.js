@@ -1,16 +1,21 @@
 angular.module('app.services', ['ionic'])
+	.value('configuration', {
+		apiKey: 'abcde',
+		apiServer: 'http://localhost:3000'
+		//apiServer: 'http://10.115.6.150:3000'
+	})
 
-	.factory('login', function($ionicModal, $rootScope, $q, $http) {
+	.factory('login', function($ionicModal, $rootScope, $q, $http, configuration) {
 
 		$rootScope.login = {
 			message: '',
-			username: 'a',
-			password: 'a',
+			username: 'ovidiu.negus@accesa.eu',
+			password: 'V@rzamulta05',
 			onclose: function() { },
 			onlogin: function() { }
 		};
 
-		var builder = $ionicModal.fromTemplateUrl('templates/login.html', { scope: $rootScope });
+		var builder = $ionicModal.fromTemplateUrl('templates/login.html', { scope: $rootScope, focusFirstInput: true });
 
 		var login = {
 
@@ -36,29 +41,50 @@ angular.module('app.services', ['ionic'])
 			{
 				var defer = $q.defer();
 
-				if($rootScope.login.username === 'a' && $rootScope.login.password === 'a')
-				{
-					$http.get('http://api.randomuser.me/')
-						.success(function(data, status) {
+				// authenticate
+				$http.get(configuration.apiServer + '/auth?key={key}&action=auth&user={user}&password={password}'.interpolate({ key: configuration.apiKey, user: $rootScope.login.username, password: $rootScope.login.password }))
+					.success(function(auth, status) {
 
-							login.info.token = data.results[0].user.email;
-							login.info.avatar = data.results[0].user.picture.thumbnail;
-							login.info.firstName = data.results[0].user.name.first.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();});
-							login.info.lastName = data.results[0].user.name.last.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();});
-							login.info.email = data.results[0].user.email;
+						if(status === 200)
+						{
+							if(auth.status === 'success')
+							{
+								// get identity information
+								$http.get(configuration.apiServer + '/auth?key={key}&action=info&token={token}&identity={identity}&fields={fields}'.interpolate({ key: configuration.apiKey, token: auth.token, identity: auth.identity, fields: 'FirstName,LastName,Avatar,Birthday,Email,Skype,Phone,JobPosition,OfficeLocation' }))
+									.success(function(info, status) {
 
-							defer.resolve({ info: login.info });
-						})
-						.error(function(data, status) {
+										if(status === 200) {
+											login.info.token = auth.token;
+											login.info.identity = auth.identity;
+											login.info.avatar = configuration.apiServer + '/auth?key={key}&action=resource&token={token}&identity={identity}&type=avatar'.interpolate({ key: configuration.apiKey, token: auth.token, identity: auth.identity });
+											login.info.firstName = info.FirstName;
+											login.info.lastName = info.LastName;
+											login.info.email = info.Email;
+
+											defer.resolve({ info: login.info });
+										}
+										else
+										{
+											defer.reject();
+										}
+									})
+									.error(function(error, status) {
+										defer.reject();
+									});
+							}
+							else
+							{
+								defer.resolve({ info: null });
+							}
+						}
+						else
+						{
 							defer.reject();
-						});
-				}
-				else
-				{
-					login.info.token = null;
-
-					defer.resolve({ info: login.info });
-				}
+						}
+					})
+					.error(function(error, status) {
+						defer.reject(error);
+					});
 
 				return defer.promise;
 			},
@@ -71,6 +97,7 @@ angular.module('app.services', ['ionic'])
 			out: function()
 			{
 				login.info.token = null;
+				login.info.identity = null;
 				login.info.avatar = null;
 				login.info.firstName = 'Unknown';
 				login.info.lastName = '';
@@ -79,6 +106,7 @@ angular.module('app.services', ['ionic'])
 
 			info: {
 				token: null,
+				identity: null,
 				avatar: null,
 				firstName: 'Unknown',
 				lastName: '',
@@ -89,7 +117,7 @@ angular.module('app.services', ['ionic'])
 		return login;
 	})
 
-	.factory('employees', function($http, $q) {
+	.factory('employees', function($http, $q, configuration, login) {
 
 		var employees = {
 
@@ -97,39 +125,27 @@ angular.module('app.services', ['ionic'])
 			{
 				var defer = $q.defer();
 
-				if(Math.random() > 0.5)
-				{
-					defer.reject();
-				}
-				else
-				{
-					$http.get('http://api.randomuser.me/?results=200')
-						.success(function(data, status) {
-							try
-							{
-								defer.resolve(data.results.map(function(item) {
-									return {
-										identity: item.user.email,
-										firstName: item.user.name.first.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();}),
-										lastName: item.user.name.last.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();}),
-										email: item.user.email,
-										skype: item.user.username,
-										phone: item.user.phone,
-										jobPosition: 'job position',
-										officeLocation: item.user.location.city.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();}),
-										avatar: item.user.picture.thumbnail
-									};
-								}));
-							}
-							catch(error)
-							{
-								defer.reject();
-							}
-						})
-						.error(function(data, status) {
-							defer.reject();
-						});
-				}
+				$http.get(configuration.apiServer + '/auth?key={key}&action=get&token={token}&fields={fields}&order={order}&skip=0&take=200'.interpolate({ key: configuration.apiKey, token: login.info.token, fields: 'Identity,FirstName,LastName,Email,Skype,Phone,JobPosition,OfficeLocation,Avatar', order: 'FirstName,LastName' }))
+					.success(function(data, status) {
+
+						defer.resolve(data.identities.map(function(item) {
+							return {
+								identity: item.Identity,
+								firstName: item.FirstName,
+								lastName: item.LastName,
+								email: item.Email,
+								skype: item.Skype,
+								phone: item.Phone,
+								jobPosition: item.JobPosition,
+								officeLocation: item.OfficeLocation,
+								avatar: configuration.apiServer + '/auth?key={key}&action=resource&token={token}&identity={identity}&type=avatar'.interpolate({ key: configuration.apiKey, token: login.info.token, identity: item.Identity })
+							};
+						}));
+
+					})
+					.error(function(data, status) {
+						defer.reject();
+					});
 
 				return defer.promise;
 			},
@@ -138,28 +154,29 @@ angular.module('app.services', ['ionic'])
 			{
 				var defer = $q.defer();
 
-				$http.get('http://api.randomuser.me/')
-					.success(function(data, status) {
-						try
-						{
+				// get identity information
+				$http.get(configuration.apiServer + '/auth?key={key}&action=info&token={token}&identity={identity}&fields={fields}'.interpolate({ key: configuration.apiKey, token: login.info.token, identity: identity, fields: 'Identity,FirstName,LastName,Avatar,Birthday,Email,Skype,Phone,JobPosition,OfficeLocation' }))
+					.success(function(info, status) {
+
+						if(status === 200) {
 							defer.resolve({
-								identity: data.results[0].user.email,
-								avatar: data.results[0].user.picture.medium,
-								firstName: data.results[0].user.name.first.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();}),
-								lastName: data.results[0].user.name.last.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();}),
-								email: data.results[0].user.email,
-								skype: data.results[0].user.username,
-								phone: data.results[0].user.phone,
-								jobPosition: 'job position',
-								officeLocation: data.results[0].user.location.city.replace(/(\w)(\w*)/g, function(g0,g1,g2){return g1.toUpperCase() + g2.toLowerCase();})
+								identity: info.Identity,
+								avatar: configuration.apiServer + '/auth?key={key}&action=resource&token={token}&identity={identity}&type=avatar'.interpolate({ key: configuration.apiKey, token: login.info.token, identity: info.Identity }),
+								firstName: info.FirstName,
+								lastName: info.LastName,
+								email: info.Email,
+								skype: info.Skype,
+								phone: info.Phone,
+								jobPosition: info.JobPosition,
+								officeLocation: info.OfficeLocation
 							});
 						}
-						catch(error)
+						else
 						{
 							defer.reject();
 						}
 					})
-					.error(function(data, status) {
+					.error(function(error, status) {
 						defer.reject();
 					});
 

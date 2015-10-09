@@ -1,6 +1,12 @@
 {
   "name": "AID",
   "app_id": "",
+  "proxies": [
+    {
+      "path": "/auth",
+      "proxyUrl": "http://10.115.6.150/auth"
+    }
+  ],
   "gulpStartupTasks": [
     "sass",
     "watch"

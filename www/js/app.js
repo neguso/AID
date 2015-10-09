@@ -2,7 +2,7 @@ angular.module('starter', ['ionic', 'app.controllers'])
 
 .run(function($ionicPlatform) {
   $ionicPlatform.ready(function() {
-    if (window.cordova && window.cordova.plugins.Keyboard) {
+    if (window.cordova && window.cordova.plugins && window.cordova.plugins.Keyboard) {
 			cordova.plugins.Keyboard.hideKeyboardAccessoryBar(true);
 		}
     if (window.StatusBar) {
@@ -23,3 +23,11 @@ angular.module('starter', ['ionic', 'app.controllers'])
 
   $urlRouterProvider.otherwise('/app/start');
 });
+
+// globals
+
+String.prototype.interpolate = function(props) {
+	return this.replace(/\{(\w+)\}/g, function(match, expr) {
+		return (props || window)[expr];
+	});
+};

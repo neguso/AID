@@ -32,7 +32,7 @@ angular.module('app.controllers', ['app.services'])
 						.catch(function(error) {
 							$ionicLoading.hide();
 
-							login.message('Check your connection and try again.');
+							login.message('Check your connection and try again.\n' + JSON.stringify(error));
 						});
 				});
 		}
