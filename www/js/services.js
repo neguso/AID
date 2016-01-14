@@ -9,7 +9,7 @@ angular.module('app.services', ['ionic'])
 
 		$rootScope.login = {
 			message: '',
-			username: 'ovidiu.negus@accesa.eu',
+			username: 'user@accesa.eu',
 			password: 'XXX',
 			onclose: function() { },
 			onlogin: function() { }
